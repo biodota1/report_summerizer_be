@@ -1,28 +1,33 @@
-import express from "express";
 import dotenv from "dotenv";
-import { Pool } from "pg";
-
 dotenv.config();
 
+import express from "express";
+import cors from "cors";
+
+import { initializeDB } from "./db/db";
+import { testConnection } from "./db/test-db";
+
+import errorHandler from "./middlewares/errorHandler";
+import logger from "./middlewares/logger";
+
+import userRoutes from "./users/user.routes";
+import authRoutes from "./auth/auth.routes";
+
 const app = express();
+
+app.use(cors());
 app.use(express.json());
+app.use(logger);
+app.use(errorHandler);
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+testConnection();
 
-const PORT = process.env.PORT || 3000;
+// initializeDB();
 
-app.get("/", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT NOW()");
-    res.json({ time: result.rows[0] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Database error");
-  }
-});
+app.use("/auth", authRoutes);
+app.use("/user", userRoutes);
 
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

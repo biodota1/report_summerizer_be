@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "CommonJS",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
+    "module": "Node16", // <-- must match moduleResolution
+    "moduleResolution": "Node16", // <-- node16 or nodenext
     "strict": true,
-    "skipLibCheck": true
-  }
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "outDir": "dist"
+  },
+  "include": ["src", "migrations"]
 }
