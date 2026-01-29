@@ -6,22 +6,22 @@ import getEnv from "../config/env";
 export default function authenticate(
   req: Request,
   _res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) throw new AuthError("Missing authentication token");
-  const accessToken = getEnv("ACCESS_SECRET");
+  const { accessToken } = req.cookies;
+  if (!accessToken) throw new AuthError("Missing authentication token");
+  const token = getEnv("ACCESS_SECRET");
 
-  if (!accessToken) throw new Error("JWT_SECRET not defined");
+  if (!token) throw new Error("JWT_SECRET not defined");
 
   try {
-    const decoded = jwt.verify(token, accessToken);
+    const decoded = jwt.verify(accessToken, token) as JwtPayload;
     if (typeof decoded !== "object" && decoded === null && !("id" in decoded)) {
       throw new AuthError("Invalid token payload");
     }
     const payload = decoded as { id: string; role?: string };
-    req.user = { id: payload.id, role: payload.role };
-
+    req.user = { id: decoded.id, role: decoded.role };
+    console.log(req.user.id);
     next();
   } catch (err: any) {
     if (err.name === "TokenExpiredError")

@@ -16,9 +16,9 @@ export class AuthService {
 
     if (!user) throw new AuthError("Invalid email or password");
 
-    const { id, role } = user;
+    const { id, name, role } = user;
 
-    const payload: Payload = { id, role };
+    const payload: Payload = { id, name, role };
 
     const match = await bcrypt.compare(password, user.password);
 

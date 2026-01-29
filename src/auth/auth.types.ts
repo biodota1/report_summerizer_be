@@ -10,5 +10,6 @@ export type RegisterInput = {
 
 export type Payload = {
   id: string;
+  name: string;
   role: string;
 };

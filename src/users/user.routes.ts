@@ -9,10 +9,10 @@ router.get(
   "/all",
   authenticate,
   authorizeRoles("admin"),
-  userController.getAllUsers
+  userController.getAllUsers,
 );
 router
-  .route("/user")
+  .route("/:id")
   .get(userController.getUser)
   .post(userController.createUser)
   .delete(userController.deleteUser)
@@ -21,5 +21,7 @@ router
 router.delete("/deleteAll", userController.deleteAll);
 
 router.put("/change-role", userController.changeRole);
+
+router.get("/me", authenticate, userController.getCurrentUser);
 
 export default router;

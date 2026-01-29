@@ -1,11 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import { UserService } from "./user.service";
+import { ForbiddenError } from "../errors/ForbiddenError";
 
 interface UserData {
   name: string;
   email: string;
   password: string;
   role: string;
+}
+
+interface DeleteUserParams {
+  id: string; // URL param is always string
 }
 
 const userService = new UserService();
@@ -53,10 +58,11 @@ export default {
     }
   },
 
-  async deleteUser(req: Request, _res: Response, next: NextFunction) {
+  async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.body;
-      await userService.deleteUser(id);
+      const id = req.params.id;
+      await userService.deleteUser({ id });
+      res.status(200).json({ msg: "User deleted" });
     } catch (err: any) {
       next(err);
     }
@@ -78,6 +84,21 @@ export default {
         message: "User role updated successfully",
         data: { id: result.id, role: result.role },
       });
+    } catch (err: any) {
+      next(err);
+    }
+  },
+  async getCurrentUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user || !req.user.id)
+        throw new ForbiddenError("Missing user id.");
+      const userId = req.user.id;
+      console.log(userId);
+      const user = await userService.getUser({ id: userId });
+      if (!user) {
+        return res.status(404).json({ msg: "User not found" });
+      }
+      res.status(200).json({ user });
     } catch (err: any) {
       next(err);
     }

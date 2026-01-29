@@ -8,7 +8,7 @@ export const generateAccessToken = (payload: Payload) => {
     getEnv("ACCESS_SECRET"),
     {
       expiresIn: "30m",
-    }
+    },
   );
 };
 

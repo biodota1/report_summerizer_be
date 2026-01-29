@@ -7,20 +7,12 @@ import { LoginInput, RegisterInput } from "./auth.types";
 const authService = new AuthService();
 
 export default {
-  // logout(req: Request, res: Response) {
-  //   const { refreshToken } = req.body;
-
-  //   if (!refreshToken)
-  //     return res.status(400).json({ message: "Refresh token required" });
-
-  //   if (!tokenExists(refreshToken))
-  //     return res.status(400).json({ message: "Invalid refresh token" });
-
-  //   // Delete from DB/memory
-  //   removeRefreshToken(refreshToken);
-
-  //   return res.json({ message: "Logged out successfully" });
-  // },
+  logout(_req: Request, res: Response) {
+    return res
+      .cookie("accessToken", "", { maxAge: 0, httpOnly: true, path: "/" })
+      .cookie("refreshToken", "", { maxAge: 0, httpOnly: true, path: "/" })
+      .json({ message: "Log out successfully" });
+  },
   // refreshToken(req: Request, res: Response) {
   //   const { refreshToken } = req.body;
 
@@ -55,7 +47,7 @@ export default {
   async register(
     req: Request<{}, {}, RegisterInput>,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const { name, email, password } = req.body;
@@ -74,7 +66,7 @@ export default {
   async login(
     req: Request<{}, {}, LoginInput>,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const { email, password } = req.body;
@@ -83,14 +75,23 @@ export default {
         password,
       });
 
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true, // use true in production (HTTPS)
-        sameSite: "strict",
-        path: "/", // cookie available everywhere
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      });
-      res.status(200).json({ accessToken, user });
+      res
+        .cookie("accessToken", accessToken, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "strict",
+          path: "/",
+          maxAge: 15 * 60 * 1000,
+        })
+        .cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: true, // use true in production (HTTPS)
+          sameSite: "strict",
+          path: "/", // cookie available everywhere
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        })
+        .status(200)
+        .json({ user });
     } catch (err: any) {
       next(err);
     }

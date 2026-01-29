@@ -1,3 +1,4 @@
+import { ConflictError } from "../errors/ConflictError";
 import { NotFoundError } from "../errors/NotFoundError";
 import { UserRepository } from "./user.repo";
 interface UserData {
@@ -16,6 +17,17 @@ export class UserService {
     return result;
   }
   async deleteUser(data: { id: string }) {
+    const user = await this.userRepo.findById(data.id);
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    if (user.role === "admin") {
+      const adminCount = await this.userRepo.countAdmins();
+      if (adminCount <= 1) {
+        throw new ConflictError("Cannot delete the last admin");
+      }
+    }
     const result = await this.userRepo.deleteById(data.id);
     return result;
   }
